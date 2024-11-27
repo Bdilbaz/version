@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meetingraum - Buchungssystem - Ebene 4</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+    </script>
+    <script type="text/javascript">
+       (function(){
+          emailjs.init({
+            publicKey: "X9GuFdmKVuvsCqx9Y",
+          });
+       })();
+    </script>
+    <style>
+        /* Grundlegende Stile für die Seite */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #F5F5F5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: #1E1E1E;
+            color: #F5F5F5;
+        }
+
+        /* Header-Stil */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #84BD22;
+            padding: 10px 20px;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        /* Container für den Hauptinhalt */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark Mode Container */
+        body.dark-mode .container {
+            background: #2C2C2C;
+            color: white;
+        }
+
+        /* Kalender-Header */
+        .calendar-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        /* Navigation im Kalenderheader */
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Allgemeine Button-Stile */
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #299E8E;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background-color: #84BD22;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Dark Mode Buttons */
+        body.dark-mode .btn {
+            background-color: #555;
+            color: white;
+        }
+
+        body.dark-mode .btn:hover {
+            background-color: #777;
+        }
+
+        /* Dropdown-Menüs */
+        .btn-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #FFFFFF;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .dropdown-content button {
+            color: black;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 16px;
+            font-family: 'Segoe UI', sans-serif;
+            cursor: pointer;
+        }
+
+        .btn-dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Kalendergitter */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 1px;
+            background-color: #ddd;
+            border: 1px solid #ddd;
+        }
+
+        .calendar-header-cell,
+        .time-cell,
+        .calendar-cell {
+            padding: 10px;
+            background-color: white;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .calendar-header-cell {
+            font-weight: bold;
+            background-color: #299E8E;
+            color: white;
+            border-radius: 6px 6px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .past-day {
+            background-color: #e0e0e0;
+            color: #aaa;
+        }
+
+        .time-cell {
+            font-weight: bold;
+            background-color: #f5f5f5;
+            font-size: 14px;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Dark Mode Zeit Zellen */
+        body.dark-mode .time-cell {
+            background-color: #555;
+            color: white;
+        }
+
+        .calendar-cell {
+            min-height: 60px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .calendar-cell:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Deaktivierte Zellen */
+        .disabled-cell {
+            pointer-events: none;
+            opacity: 0.5;
+            background-color: #e0e0e0;
+        }
+
+        /* Dark Mode Kalender */
+        body.dark-mode .calendar-header-cell {
+            background-color: #555;
+        }
+
+        body.dark-mode .calendar-cell {
+            background-color: #666;
+            color: white;
+        }
+
+        body.dark-mode .calendar-cell:hover {
+            background-color: #555;
+        }
+
+        /* Buchungsstatus */
+        .booked-internal {
+            background-color: #86BB22;
+            color: white;
+            cursor: pointer;
+        }
+
+        .booked-external {
+            background-color: #299E8E;
+            color: white;
+            cursor: pointer;
+        }
+
+        .booked-multi {
+            background-color: #a5a5a5;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Modal-Stile */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            width: 600px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* Dark Mode Modal */
+        body.dark-mode .modal-content {
+            background-color: #2C2C2C;
+            color: white;
+        }
+
+        /* Schließen Button für Modals */
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+        }
+
+        body.dark-mode .modal-close {
+            color: #F5F5F5;
+        }
+
+        /* Formulargruppen */
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: border-color 0.3s;
+            font-size: 16px;
+        }
+
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: #299E8E;
+        }
+
+        /* Dark Mode Input */
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select {
+            background-color: #444;
+            color: white;
+            border-color: #555;
+        }
+
+        /* Rauminformationen */
+        .room-info {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* Dark Mode Rauminformationen */
+        body.dark-mode .room-info {
+            background-color: #2C2C2C;
+            color: white;
+        }
+
+        /* Legende */
+        .legend {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        /* Dark Mode Legende */
+        body.dark-mode .legend-color {
+            border: 1px solid white;
+        }
+
+        body.dark-mode .legend-item {
+            color: white;
+        }
+
+        /* Stornierungsbutton */
+        .btn-cancel {
+            background-color: #FF4C4C;
+            padding: 10px 20px;
+        }
+
+        .btn-cancel:hover {
+            background-color: #FF0000;
+        }
+
+        /* Slot-Informationen */
+        .slot-info {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: bold;
+            height: 100%;
+        }
+
+        /* Buchungshistorie Modal */
+        .history-modal {
+            display: none;
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: 80%;
+            height: calc(100% - 100px);
+            background-color: rgba(255, 255, 255, 0.95);
+            overflow-y: auto;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 0 10%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        /* Dark Mode Buchungshistorie */
+        body.dark-mode .history-modal {
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .history-table th, .history-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .history-table th {
+            background-color: #299E8E;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .history-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dark Mode Table */
+        body.dark-mode .history-table th {
+            background-color: #555;
+        }
+
+        body.dark-mode .history-table td {
+            background-color: #444;
+            color: white;
+        }
+
+        /* Buchungsbestätigung Modal */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 100px);
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 0;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .confirmation-modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            width: 600px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* Dark Mode Buchungsbestätigung */
+        body.dark-mode .confirmation-modal-content {
+            background-color: #2C2C2C;
+            color: white;
+        }
+
+        /* Stornierungsmodal */
+        .cancel-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* Dark Mode Stornierungsmodal */
+        body.dark-mode .cancel-modal {
+            background-color: #2C2C2C;
+            color: white;
+        }
+
+        /* Konfliktmodal */
+        .booking-conflict-modal {
+            display: none;
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 100px);
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 0;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .booking-conflict-modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            width: 600px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* Dark Mode Konfliktmodal */
+        body.dark-mode .booking-conflict-modal-content {
+            background-color: #2C2C2C;
+            color: white;
+        }
+
+        /* Neue Stile für Mehrraumbuchung */
+        .multi-room-select {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+
+        .multi-room-select:hover {
+            background-color: #f0f0f0;
+        }
+
+        body.dark-mode .multi-room-select:hover {
+            background-color: #3A3A3A;
+        }
+
+        .room-checkbox {
+            margin-right: 5px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .multi-room-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .multi-room-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #FFFFFF;
+            min-width: 220px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .multi-room-dropdown:hover .multi-room-dropdown-content {
+            display: block;
+        }
+
+        /* Dark Mode Dropdown */
+        body.dark-mode .dropdown-content {
+            background-color: #2C2C2C;
+            color: white;
+        }
+
+        body.dark-mode .dropdown-content button {
+            color: white;
+        }
+
+        body.dark-mode .multi-room-dropdown-content {
+            background-color: #2C2C2C;
+        }
+
+        body.dark-mode .multi-room-select {
+            color: white;
+        }
+
+        /* Sprachumschalter */
+        .language-switcher {
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #299E8E;
+            color: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .language-switcher:hover {
+            background-color: #84BD22;
+        }
+
+        /* Dark Mode Language Switcher */
+        body.dark-mode .language-switcher {
+            background-color: #555;
+        }
+
+        /* Dark Mode Dropdown Button */
+        body.dark-mode .btn-dropdown .btn {
+            background-color: #555;
+        }
+
+        /* Dark Mode Raum Dropdown */
+        body.dark-mode .multi-room-button {
+            background-color: #555;
+        }
+
+        /* Filterfunktion */
+        .filter-button {
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #299E8E;
+            color: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .filter-button:hover {
+            background-color: #84BD22;
+        }
+
+        /* Filter Dropdown */
+        .filter-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .filter-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #FFFFFF;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .filter-dropdown:hover .filter-dropdown-content {
+            display: block;
+        }
+
+        .filter-dropdown-content label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .filter-dropdown-content select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        /* Dark Mode Filter Dropdown */
+        body.dark-mode .filter-dropdown-content {
+            background-color: #2C2C2C;
+            color: white;
+        }
+
+        body.dark-mode .filter-dropdown-content select {
+            background-color: #444;
+            color: white;
+            border-color: #555;
+        }
+
+        /* Neue Zeitdarstellung */
+        .time-cell {
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #f5f5f5;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Dark Mode Zeit Zellen */
+        body.dark-mode .time-cell {
+            background-color: #555;
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .calendar-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .calendar-nav {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+                justify-content: center;
+            }
+
+            .modal-content,
+            .confirmation-modal-content,
+            .booking-conflict-modal-content {
+                width: 90%;
+                height: auto;
+            }
+
+            .history-modal,
+            .confirmation-modal,
+            .booking-conflict-modal {
+                width: 95%;
+                margin: 0 2.5%;
+            }
+
+            .room-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Neue Buttons für Meetingraum-Navigation */
+        .room-navigation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Neuer zentraler Meetingraum Button */
+        .meeting-room-button {
+            padding: 10px 20px;
+            background-color: #299E8E;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .meeting-room-button:hover {
+            background-color: #84BD22;
+        }
+
+        /* Neue Filterfunktion */
+        .filter-icon {
+            font-size: 24px;
+            cursor: pointer;
+            color: #299E8E;
+        }
+
+        .filter-icon:hover {
+            color: #84BD22;
+        }
+
+        /* Dark Mode Filter Icon */
+        body.dark-mode .filter-icon {
+            color: #555;
+        }
+
+        /* Tooltip-Stile */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position oberhalb des Elements */
+            left: 50%;
+            margin-left: -100px; /* Zentriert */
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Dark Mode Tooltip */
+        body.dark-mode .tooltip .tooltiptext {
+            background-color: #2C2C2C;
+        }
+
+        /* Kalender Scrollbar */
+        .calendar-grid {
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        /* Scrollbar Stile */
+        .calendar-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .calendar-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .calendar-grid::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .calendar-grid::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Dark Mode Scrollbar */
+        body.dark-mode .calendar-grid::-webkit-scrollbar-track {
+            background: #2C2C2C;
+        }
+
+        body.dark-mode .calendar-grid::-webkit-scrollbar-thumb {
+            background: #555;
+        }
+
+        body.dark-mode .calendar-grid::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="headerTitle">Meetingraum - Buchungssystem - Ebene 4</h1>
+        <div class="calendar-nav">
+            <!-- Filterfunktion -->
+            <div class="filter-dropdown">
+                <div class="filter-button">
+                    <span class="filter-icon">🔍</span>
+                    <span id="filterText">Filter</span>
+                </div>
+                <div class="filter-dropdown-content">
+                    <label for="filterType" id="filterTypeLabel">Buchungstyp</label>
+                    <select id="filterType">
+                        <option value="all">Alle</option>
+                        <option value="internal">Intern</option>
+                        <option value="external">Extern</option>
+                    </select>
+                    <label for="filterRoom" id="filterRoomLabel">Raum</label>
+                    <select id="filterRoom">
+                        <option value="all">Alle</option>
+                        <option value="1">Meetingraum 1</option>
+                        <option value="2">Meetingraum 2</option>
+                        <option value="3">Meetingraum 3</option>
+                    </select>
+                    <button class="btn" id="applyFilterButton">Anwenden</button>
+                </div>
+            </div>
+            <!-- Dark Mode Toggle -->
+            <span id="darkModeToggle" style="cursor: pointer; font-size: 24px;">☀️</span>
+            <!-- Sprachumschalter -->
+            <div class="language-switcher" id="languageSwitcher">DE</div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="calendar-header">
+            <div class="calendar-nav">
+                <button class="btn" id="prevWeek"><span id="prevWeekText">< Vorherige Woche</span></button>
+                <button class="btn" id="nextWeek"><span id="nextWeekText">Nächste Woche ></span></button>
+            </div>
+            <!-- Meetingraum Button zentral platziert -->
+            <button class="meeting-room-button" id="roomButton">Meetingräume</button>
+            <div class="calendar-nav">
+                <!-- Monat Button -->
+                <div class="btn-dropdown">
+                    <button class="btn" id="monthButton">Monat</button>
+                    <div class="dropdown-content" id="monthDropdown">
+                        <!-- Monate werden dynamisch geladen -->
+                    </div>
+                </div>
+                <!-- Jahr Button -->
+                <div class="btn-dropdown">
+                    <button class="btn" id="yearButton">Jahr</button>
+                    <div class="dropdown-content" id="yearDropdown">
+                        <!-- Jahre werden dynamisch geladen -->
+                    </div>
+                </div>
+                <!-- Buchungshistorie Button -->
+                <button class="btn" id="historyButton">Buchungshistorie</button>
+            </div>
+        </div>
+        
+        <div id="calendar" class="calendar-grid">
+            <!-- Kalender wird hier generiert -->
+        </div>
+        
+        <div class="room-info" id="roomInfo">
+            <div>
+                <h3 id="roomDetailsTitle">Raumdetails</h3>
+                <p><strong id="maxParticipantsLabel">Maximale Teilnehmerzahl:</strong> <span id="maxParticipants">8</span></p>
+                <p><strong id="equipmentLabel">Ausstattung:</strong> Beamer, Whiteboard, Video-Konferenzsystem</p>
+                <p><strong id="additionalLabel">Zusätzlich:</strong> Snacks & Getränke verfügbar</p>
+            </div>
+            <!-- Legende -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #86BB22;"></div>
+                    <span id="legendInternal">Intern</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #299E8E;"></div>
+                    <span id="legendExternal">Extern</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #a5a5a5;"></div>
+                    <span id="legendMulti">Mehrraumbuchung</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buchungsmodal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 id="bookingTitle">Termin buchen</h2>
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="title" id="titleLabel">Titel</label>
+                    <input type="text" id="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="name" id="nameLabel">Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email" id="emailLabel">E-Mail</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="department" id="departmentLabel">Abteilung</label>
+                    <input type="text" id="department" required>
+                </div>
+                <div class="form-group">
+                    <label for="participants" id="participantsLabel">Teilnehmerzahl</label>
+                    <input type="number" id="participants" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="startTime" id="startTimeLabel">Startzeit</label>
+                    <input type="time" id="startTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="endTime" id="endTimeLabel">Endzeit</label>
+                    <input type="time" id="endTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="type" id="typeLabel">Buchungstyp</label>
+                    <select id="type">
+                        <option value="internal">Intern</option>
+                        <option value="external">Extern</option>
+                    </select>
+                </div>
+                <!-- Raum Auswahl -->
+                <div class="form-group">
+                    <label id="roomSelectionLabel">Raum auswählen</label>
+                    <div class="multi-room-dropdown">
+                        <div class="multi-room-button btn" id="selectedRooms">Meetingräume</div>
+                        <div class="multi-room-dropdown-content">
+                            <div class="multi-room-select">
+                                <input type="checkbox" id="room1" class="room-checkbox" value="1" checked>
+                                <label for="room1">Meetingraum 1</label>
+                            </div>
+                            <div class="multi-room-select">
+                                <input type="checkbox" id="room2" class="room-checkbox" value="2">
+                                <label for="room2">Meetingraum 2</label>
+                            </div>
+                            <div class="multi-room-select">
+                                <input type="checkbox" id="room3" class="room-checkbox" value="3">
+                                <label for="room3">Meetingraum 3</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn" id="bookButton">Buchen</button>
+                <button type="button" class="btn btn-cancel" onclick="closeModal()" id="cancelButton">Abbrechen</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Buchungsbestätigungsmodal -->
+    <div id="confirmationModal" class="confirmation-modal">
+        <div class="confirmation-modal-content">
+            <button class="modal-close" onclick="closeConfirmationModal()">&times;</button>
+            <h2 id="confirmationTitle">Buchung erfolgreich!</h2>
+            <div class="booking-details" id="bookingDetails"></div>
+            <button class="btn" onclick="closeConfirmationModal()" id="closeConfirmationButton">Schließen</button>
+        </div>
+    </div>
+
+    <!-- Stornierungsmodal -->
+    <div id="cancelModal" class="cancel-modal">
+        <button class="modal-close" onclick="closeCancelModal()">&times;</button>
+        <h2 id="cancelTitle">Termin stornieren?</h2>
+        <div class="booking-details" id="cancelBookingDetails"></div>
+        <div class="cancel-buttons">
+            <button class="btn" id="confirmCancel" style="background-color: #84BD22;">Ja, Stornieren</button>
+            <button class="btn btn-cancel" id="abortCancel">Abbrechen</button>
+        </div>
+    </div>
+
+    <!-- Konfliktmodal -->
+    <div id="conflictModal" class="booking-conflict-modal">
+        <div class="booking-conflict-modal-content">
+            <button class="modal-close" onclick="closeConflictModal()">&times;</button>
+            <h2 id="conflictTitle">Termin Konflikt</h2>
+            <p id="conflictMessage"></p>
+            <div class="booking-conflict-buttons">
+                <button class="btn" id="acceptAlternativeButton">Alternativ buchen</button>
+                <button class="btn btn-cancel" id="abortConflict">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buchungshistorie Modal -->
+    <div id="historyModal" class="history-modal">
+        <h2 id="historyTitle">Aktuelle Buchungen der Woche</h2>
+        <table class="history-table" id="historyTable">
+            <thead>
+                <tr>
+                    <th id="historyDateHeader">Datum</th>
+                    <th id="historyTitleHeader">Titel</th>
+                    <th id="historyNameHeader">Name</th>
+                    <th id="historyDepartmentHeader">Abteilung</th>
+                    <th id="historyStartHeader">Startzeit</th>
+                    <th id="historyEndHeader">Endzeit</th>
+                    <th id="historyTypeHeader">Buchungsart</th>
+                    <th id="historyRoomsHeader">Räume</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Buchungshistorie wird hier geladen -->
+            </tbody>
+        </table>
+        <button class="btn" onclick="closeHistoryModal()" id="closeHistoryButton">Schließen</button>
+    </div>
+
+    <!-- Buchungsdetails Modal -->
+    <div id="bookingDetailsModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeBookingDetailsModal()">&times;</button>
+            <h2 id="bookingDetailsTitle">Buchungsdetails</h2>
+            <div class="booking-details" id="bookingDetailsContent"></div>
+            <div class="cancel-buttons">
+                <button class="btn" id="confirmCancelDetails" style="background-color: #84BD22;">Ja, Stornieren</button>
+                <button class="btn btn-cancel" id="closeDetailsModal">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Globale Variablen */
+        let currentDate = new Date();
+        const calendar = document.getElementById('calendar');
+        const bookingModal = document.getElementById('bookingModal');
+        const conflictModal = document.getElementById('conflictModal');
+        const historyModal = document.getElementById('historyModal');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const cancelModal = document.getElementById('cancelModal');
+        const bookingForm = document.getElementById('bookingForm');
+        const bookingDetailsModal = document.getElementById('bookingDetailsModal');
+        let selectedCell = null;
+        let selectedBooking = null;
+        let bookingsData = [];
+        let language = 'DE';
+
+        /* Initialisierung des Kalenders */
+        function initCalendar() {
+            updateMonthDropdown();
+            updateYearDropdown();
+            generateCalendarGrid();
+            loadBookingsFromLocalStorage();
+            updateHeaderButtons();
+            updateRoomDetails();
+            loadBookings();
+            disablePastCells();
+            updateLanguage();
+        }
+
+        /* Aktualisierung des Monats-Dropdowns */
+        function updateMonthDropdown() {
+            const monthDropdown = document.getElementById('monthDropdown');
+            monthDropdown.innerHTML = '';
+            for (let month = 0; month < 12; month++) {
+                const button = document.createElement('button');
+                const locale = language === 'DE' ? 'de-DE' : 'en-US';
+                button.innerHTML = new Date(2024, month).toLocaleString(locale, { month: 'long' });
+                button.style.fontSize = '16px';
+                button.onclick = () => selectMonth(month);
+                monthDropdown.appendChild(button);
+            }
+        }
+
+        /* Aktualisierung des Jahres-Dropdowns */
+        function updateYearDropdown() {
+            const yearDropdown = document.getElementById('yearDropdown');
+            yearDropdown.innerHTML = '';
+            const currentYear = new Date().getFullYear();
+            for (let year = currentYear; year <= 2032; year++) {
+                const button = document.createElement('button');
+                button.innerHTML = year;
+                button.style.fontSize = '16px';
+                button.onclick = () => selectYear(year);
+                yearDropdown.appendChild(button);
+            }
+        }
+
+        /* Auswahl eines Monats */
+        function selectMonth(month) {
+            currentDate.setMonth(month);
+            currentDate.setDate(1);
+            // Ersten Montag des Monats finden
+            while (currentDate.getDay() !== 1) { // 1 = Montag
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            updateHeaderButtons();
+            initCalendar();
+        }
+
+        /* Auswahl eines Jahres */
+        function selectYear(year) {
+            currentDate.setFullYear(year);
+            updateHeaderButtons();
+            initCalendar();
+        }
+
+        /* Aktualisierung der Header-Buttons */
+        function updateHeaderButtons() {
+            const startOfWeek = getStartOfWeek(currentDate);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(endOfWeek.getDate() + 4);
+
+            const locale = language === 'DE' ? 'de-DE' : 'en-US';
+            const monthYearStr = startOfWeek.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+            const dateRangeStr = `${startOfWeek.getDate()}. - ${endOfWeek.getDate()}. ${monthYearStr}`;
+            
+            document.getElementById('monthButton').textContent = dateRangeStr;
+            document.getElementById('yearButton').textContent = currentDate.getFullYear();
+        }
+
+        /* Generierung des Kalendergitters */
+        function generateCalendarGrid() {
+            calendar.innerHTML = '';
+            const weekDays = language === 'DE' ? ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'] : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+            const startOfWeek = getStartOfWeek(currentDate);
+
+            // Wochentagsüberschriften hinzufügen
+            calendar.appendChild(createCell(language === 'DE' ? 'Zeit' : 'Time', 'calendar-header-cell'));
+            weekDays.forEach((day, index) => {
+                const date = new Date(startOfWeek);
+                date.setDate(date.getDate() + index);
+                const locale = language === 'DE' ? 'de-DE' : 'en-US';
+                const formattedDate = date.toLocaleDateString(locale, { weekday: 'long', day: '2-digit', month: 'long' });
+                const headerCell = createCell(formattedDate, 'calendar-header-cell');
+                headerCell.dataset.dayIndex = index;
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                date.setHours(0, 0, 0, 0);
+
+                if (date < today) {
+                    headerCell.classList.add('past-day');
+                }
+
+                calendar.appendChild(headerCell);
+            });
+
+            // Zeitzellen für jede Minute
+            for (let hour = 8; hour <= 19; hour++) {
+                for (let minute = 0; minute < 60; minute++) {
+                    const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    calendar.appendChild(createCell(time, 'time-cell'));
+
+                    for (let day = 0; day < 5; day++) {
+                        const cell = createCell('', 'calendar-cell');
+                        cell.dataset.time = time;
+                        cell.dataset.day = day;
+                        cell.addEventListener('click', (e) => cellClickHandler(e, cell, day, time));
+                        calendar.appendChild(cell);
+                    }
+                }
+            }
+        }
+
+        /* Erstellung einer einzelnen Zelle */
+        function createCell(content, className) {
+            const cell = document.createElement('div');
+            cell.innerHTML = content;
+            cell.className = className;
+            return cell;
+        }
+
+        /* Klick-Handler für Zellen */
+        function cellClickHandler(e, cell, day, time) {
+            e.stopPropagation();
+            if (cell.dataset.bookingInfo) {
+                const bookingInfo = JSON.parse(cell.dataset.bookingInfo);
+                selectedBooking = bookingInfo;
+                openBookingDetailsModal(bookingInfo);
+            } else {
+                openBookingModal(cell, day, time);
+            }
+        }
+
+        /* Öffnen des Buchungsmodals */
+        function openBookingModal(cell, day, time) {
+            selectedCell = cell;
+            const bookingDate = getBookingDate(day);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            bookingDate.setHours(0, 0, 0, 0);
+
+            if (bookingDate < today) {
+                return;
+            }
+
+            document.getElementById('startTime').value = time;
+            bookingModal.style.display = 'flex';
+        }
+
+        /* Öffnen des Buchungsdetailsmodals */
+        function openBookingDetailsModal(booking) {
+            const bookingDetailsContent = document.getElementById('bookingDetailsContent');
+            bookingDetailsContent.innerHTML = `
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Titel' : 'Title'}:</strong> ${booking.title}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Name' : 'Name'}:</strong> ${booking.name}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Teilnehmerzahl' : 'Participants'}:</strong> ${booking.participants}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Startzeit' : 'Start Time'}:</strong> ${booking.startTime}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Endzeit' : 'End Time'}:</strong> ${booking.endTime}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Buchungstyp' : 'Booking Type'}:</strong> ${booking.type === 'internal' ? (language === 'DE' ? 'Intern' : 'Internal') : (language === 'DE' ? 'Extern' : 'External')}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Räume' : 'Rooms'}:</strong> ${booking.rooms.map(r => (language === 'DE' ? 'Meetingraum ' : 'Meeting Room ') + r).join(', ')}</div>
+            `;
+            bookingDetailsModal.style.display = 'flex';
+        }
+
+        /* Schließen des Buchungsdetailsmodals */
+        function closeBookingDetailsModal() {
+            bookingDetailsModal.style.display = 'none';
+            selectedBooking = null;
+        }
+
+        document.getElementById('closeDetailsModal').addEventListener('click', closeBookingDetailsModal);
+
+        /* Bestätigung der Stornierung im Buchungsdetailsmodal */
+        document.getElementById('confirmCancelDetails').addEventListener('click', () => {
+            if (selectedBooking) {
+                deleteBooking(selectedBooking);
+                bookingDetailsModal.style.display = 'none';
+            }
+        });
+
+        /* Erhalt des Buchungsdatums */
+        function getBookingDate(day) {
+            const startOfWeek = getStartOfWeek(currentDate);
+            const bookingDate = new Date(startOfWeek);
+            bookingDate.setDate(bookingDate.getDate() + day);
+            return bookingDate;
+        }
+
+        /* Schließen des Buchungsmodals */
+        function closeModal() {
+            bookingModal.style.display = 'none';
+            bookingForm.reset();
+        }
+
+        /* Schließen des Bestätigungsmodals */
+        function closeConfirmationModal() {
+            confirmationModal.style.display = 'none';
+            document.getElementById('bookingDetails').innerHTML = '';
+        }
+
+        /* Anzeige der Buchungsbestätigung */
+        function showBookingConfirmation(booking) {
+            const bookingDetailsContainer = document.getElementById('bookingDetails');
+            bookingDetailsContainer.innerHTML = `
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Titel' : 'Title'}:</strong> ${booking.title}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Teilnehmerzahl' : 'Participants'}:</strong> ${booking.participants}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Startzeit' : 'Start Time'}:</strong> ${booking.startTime}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Endzeit' : 'End Time'}:</strong> ${booking.endTime}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Buchungstyp' : 'Booking Type'}:</strong> ${booking.type === 'internal' ? (language === 'DE' ? 'Intern' : 'Internal') : (language === 'DE' ? 'Extern' : 'External')}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Räume' : 'Rooms'}:</strong> ${booking.rooms.map(r => (language === 'DE' ? 'Meetingraum ' : 'Meeting Room ') + r).join(', ')}</div>
+            `;
+            confirmationModal.style.display = 'flex';
+        }
+
+        /* Speichern einer Buchung */
+        function saveBooking(booking) {
+            bookingsData.push(booking);
+            saveBookingsToLocalStorage();
+            loadBookings();
+
+            //Sende die E-Mail bei einer erfolgreichen Buchung
+            sendBookingEmail(booking);
+        }
+
+        /*Senden einer E-Mail*/
+        function sendBookingEmail(bookingData) {
+            const icsLink = generateICSFile(bookingData);
+            
+            const templateParams = {
+                title: bookingData.title,
+                name: bookingData.name,
+                email: bookingData.email,
+                department: bookingData.department,
+                startTime: bookingData.startTime,
+                endTime: bookingData.endTime,
+                participants: bookingData.participants,
+                rooms: bookingData.rooms.join(', '),
+                to_email: bookingData.email, 
+                reply_to: bookingData.email,
+                ics_link: icsLink, // Der Link wird in der E-Mail verwendet
+            };
+
+            emailjs.send("service_tp6geem", "template_imwd8tm", templateParams)
+                .then(response => {
+                    console.log("E-Mail erfolgreich gesendet!", response.status, response.text);
+                })
+                .catch(error => {
+                    console.error("Fehler beim Senden der E-Mail:", error);
+                });
+        }
+
+        /*Kalendereintrag senden*/
+        function generateICSFile(bookingData) {
+            const { title, startTime, endTime, date, rooms } = bookingData;
+            const startDate = new Date(`${date}T${startTime}`);
+            const endDate = new Date(`${date}T${endTime}`);
+            const formattedStart = startDate.toISOString().replace(/-|:|\.\d+/g, "");
+            const formattedEnd = endDate.toISOString().replace(/-|:|\.\d+/g, "");
+
+            const icsContent = `
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Your Booking System//DE
+BEGIN:VEVENT
+UID:${Date.now()}@yourdomain.com
+DTSTAMP:${formattedStart}
+DTSTART:${formattedStart}
+DTEND:${formattedEnd}
+SUMMARY:${title}
+DESCRIPTION:Meetingraum Buchung - Raum ${rooms.join(', ')}
+LOCATION:Meetingraum ${rooms.join(', ')}
+END:VEVENT
+END:VCALENDAR`.trim();
+
+            // Base64-Encoding
+            return btoa(unescape(encodeURIComponent(icsContent)));
+        }
+
+        /* Überprüfung auf Konflikte */
+        function checkForConflict(newBooking) {
+            let conflicts = [];
+            for (const existing of bookingsData) {
+                if (newBooking.date !== existing.date) continue;
+
+                const newStartTime = new Date(`1970-01-01T${newBooking.startTime}:00`);
+                const newEndTime = new Date(`1970-01-01T${newBooking.endTime}:00`);
+                const existingStartTime = new Date(`1970-01-01T${existing.startTime}:00`);
+                const existingEndTime = new Date(`1970-01-01T${existing.endTime}:00`);
+
+                if (
+                    (newStartTime < existingEndTime && newEndTime > existingStartTime) &&
+                    newBooking.rooms.some(r => existing.rooms.includes(r))
+                ) {
+                    conflicts.push(existing);
+                }
+            }
+            return conflicts;
+        }
+
+        /* Öffnen des Konfliktmodals */
+        function openConflictModal(conflicts, bookingData) {
+            const conflictMessage = document.getElementById('conflictMessage');
+            conflictMessage.innerHTML = `${language === 'DE' ? 'Der Raum ist ab' : 'The room is booked from'} ${conflicts[0].startTime} ${language === 'DE' ? 'bis' : 'to'} ${conflicts[0].endTime} ${language === 'DE' ? 'bereits gebucht.' : 'already.'}<br>${language === 'DE' ? 'Möchten Sie den Termin von' : 'Do you want to book from'} ${bookingData.startTime} ${language === 'DE' ? 'bis' : 'to'} ${conflicts[0].startTime} ${language === 'DE' ? 'buchen?' : 'instead?'}`;
+            conflictModal.style.display = 'flex';
+
+            document.getElementById('acceptAlternativeButton').onclick = () => {
+                bookingData.endTime = conflicts[0].startTime;
+                saveBooking(bookingData);
+                closeConflictModal();
+                showBookingConfirmation(bookingData);
+                closeModal();
+            };
+        }
+
+        /* Event Listener für Konfliktmodal */
+        document.getElementById('abortConflict').addEventListener('click', closeConflictModal);
+
+        /* Schließen des Konfliktmodals */
+        function closeConflictModal() {
+            conflictModal.style.display = 'none';
+        }
+
+        /* Aktualisieren einer Buchung */
+        function updateBooking(updatedBooking) {
+            bookingsData = bookingsData.map(b => b.id === updatedBooking.id ? updatedBooking : b);
+            saveBookingsToLocalStorage();
+            loadBookings();
+        }
+
+        /* Löschen einer Buchung */
+        function deleteBooking(booking) {
+            bookingsData = bookingsData.filter(b => b.id !== booking.id);
+            saveBookingsToLocalStorage();
+            loadBookings();
+        }
+
+        /* Laden der Buchungen */
+        function loadBookings() {
+            // Vorhandene Buchungen löschen
+            document.querySelectorAll('.calendar-cell').forEach(cell => {
+                cell.classList.remove('booked-internal', 'booked-external', 'booked-multi');
+                cell.innerHTML = '';
+                cell.style.backgroundColor = '';
+                delete cell.dataset.bookingInfo;
+            });
+
+            const currentWeekStart = getStartOfWeek(currentDate);
+            const currentWeekEnd = new Date(currentWeekStart);
+            currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
+
+            let filteredBookings = bookingsData.filter(booking => {
+                const bookingDate = new Date(booking.date);
+                return bookingDate >= currentWeekStart && bookingDate <= currentWeekEnd;
+            });
+
+            // Anwendung der Filter
+            const filterType = document.getElementById('filterType').value;
+            const filterRoom = document.getElementById('filterRoom').value;
+
+            if (filterType !== 'all') {
+                filteredBookings = filteredBookings.filter(booking => booking.type === filterType);
+            }
+
+            if (filterRoom !== 'all') {
+                filteredBookings = filteredBookings.filter(booking => booking.rooms.includes(filterRoom));
+            }
+
+            filteredBookings.forEach(booking => {
+                const bookingDate = new Date(booking.date);
+                const dayIndex = bookingDate.getDay() === 0 ? 6 : bookingDate.getDay() - 1;
+                const timeSlots = getTimeSlots(booking.startTime, booking.endTime);
+                timeSlots.forEach(slot => {
+                    booking.rooms.forEach(room => {
+                        const slotCell = document.querySelector(`[data-day="${dayIndex}"][data-time="${slot}"]`);
+                        if (slotCell && slotCell.style.display !== 'none') {
+                            const className = booking.rooms.length > 1 ? 'booked-multi' : booking.type === 'internal' ? 'booked-internal' : 'booked-external';
+                            slotCell.classList.add(className);
+                            slotCell.innerHTML = `<div class="slot-info" data-booking-id="${booking.id}">${booking.title} | ${booking.name}</div>`;
+                            slotCell.dataset.bookingInfo = JSON.stringify(booking);
+                        }
+                    });
+                });
+            });
+
+            mergeBookedCells();
+        }
+
+        /* Erhalt der Zeitintervalle */
+        function getTimeSlots(start, end) {
+            const times = [];
+            let current = new Date(2024, 0, 1, ...start.split(':'));
+            const endTime = new Date(2024, 0, 1, ...end.split(':'));
+
+            while (current < endTime) {
+                const hours = current.getHours().toString().padStart(2, '0');
+                const minutes = current.getMinutes().toString().padStart(2, '0');
+                times.push(`${hours}:${minutes}`);
+                current.setMinutes(current.getMinutes() + 1);
+            }
+
+            return times;
+        }
+
+        /* Erhalt des Wochenanfangs */
+        function getStartOfWeek(date) {
+            const tempDate = new Date(date);
+            const day = tempDate.getDay();
+            const diff = tempDate.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(tempDate.setDate(diff));
+        }
+
+        /* Event Listener für Buchungsformular */
+        bookingForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const name = document.getElementById('name').value;
+            const department = document.getElementById('department').value;
+            const type = document.getElementById('type').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const email = document.getElementById('email').value;
+            const participants = parseInt(document.getElementById('participants').value);
+
+            const maxParticipants = parseInt(document.getElementById('participants').max);
+
+            if (participants > maxParticipants) {
+                alert(`${language === 'DE' ? 'Die maximale Teilnehmerzahl beträgt' : 'The maximum number of participants is'} ${maxParticipants}.`);
+                return;
+            }
+
+            const selectedRooms = getSelectedRoomsFromModal();
+
+            if (selectedRooms.length === 0) {
+                alert(language === 'DE' ? 'Bitte wählen Sie mindestens einen Raum aus.' : 'Please select at least one room.');
+                return;
+            }
+
+            if (selectedCell) {
+                const bookingData = {
+                    id: Date.now(),
+                    title,
+                    name,
+                    department,
+                    type,
+                    startTime,
+                    endTime,
+                    email,
+                    participants,
+                    rooms: selectedRooms,
+                    date: getBookingDate(parseInt(selectedCell.dataset.day)).toISOString().split('T')[0],
+                    bookedDate: new Date().toISOString()
+                };
+
+                const conflicts = checkForConflict(bookingData);
+                if (conflicts.length > 0) {
+                    openConflictModal(conflicts, bookingData);
+                    return;
+                }
+
+                saveBooking(bookingData);
+                showBookingConfirmation(bookingData);
+            }
+            closeModal();
+        });
+
+        /* Erhalt der ausgewählten Räume aus dem Modal */
+        function getSelectedRoomsFromModal() {
+            const roomCheckboxes = bookingForm.querySelectorAll('.room-checkbox');
+            const selectedRooms = [];
+            roomCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedRooms.push(checkbox.value);
+                }
+            });
+            return selectedRooms;
+        }
+
+        /* Erhalt der ausgewählten Räume */
+        function getSelectedRooms() {
+            const roomCheckboxes = document.querySelectorAll('.room-checkbox');
+            const selectedRooms = [];
+            roomCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedRooms.push(checkbox.value);
+                }
+            });
+            return selectedRooms;
+        }
+
+        /* Event Listener für Raumkapazität */
+        document.querySelectorAll('.room-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                // Überprüfung, ob Räume 1 und 3 gleichzeitig ausgewählt sind ohne Raum 2
+                const selectedRooms = getSelectedRoomsFromModal();
+                if (selectedRooms.includes('1') && selectedRooms.includes('3') && !selectedRooms.includes('2')) {
+                    alert(language === 'DE' ? 'Räume 1 und 3 können nicht gemeinsam gebucht werden. Bitte wählen Sie zusätzlich Raum 2 aus.' : 'Rooms 1 and 3 cannot be booked together. Please also select Room 2.');
+                    checkbox.checked = false;
+                    updateRoomDetails();
+                    return;
+                }
+                updateRoomDetails();
+            });
+        });
+
+        /* Aktualisierung der Rauminformationen */
+        function updateRoomDetails() {
+            const selectedRooms = getSelectedRoomsFromModal();
+            let maxParticipantsElement = document.getElementById('maxParticipants');
+            let maxParticipants = 0;
+
+            if (selectedRooms.length === 1) {
+                if (selectedRooms.includes('1') || selectedRooms.includes('2')) {
+                    maxParticipants = 8;
+                } else if (selectedRooms.includes('3')) {
+                    maxParticipants = 6;
+                }
+            } else if (selectedRooms.length === 2) {
+                if (selectedRooms.includes('1') && selectedRooms.includes('2')) {
+                    maxParticipants = 16;
+                } else if (selectedRooms.includes('2') && selectedRooms.includes('3')) {
+                    maxParticipants = 14;
+                } else if (selectedRooms.includes('1') && selectedRooms.includes('3')) {
+                    // Nicht erlaubt
+                    maxParticipants = 0;
+                }
+            } else if (selectedRooms.length === 3) {
+                maxParticipants = 22;
+            }
+
+            maxParticipantsElement.textContent = maxParticipants.toString();
+            document.getElementById('participants').max = maxParticipants;
+            document.getElementById('participants').min = 1; // Mindestwert setzen
+
+            // Aktualisiere den Button-Text im Modal
+            const selectedRoomsText = selectedRooms.length > 0 ? selectedRooms.map(r => (language === 'DE' ? 'Meetingraum ' : 'Meeting Room ') + r).join(', ') : (language === 'DE' ? 'Meetingräume' : 'Meeting Rooms');
+            document.getElementById('selectedRooms').textContent = selectedRoomsText;
+        }
+
+        /* Deaktivierung von vergangenen Zellen */
+        function disablePastCells() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const startOfWeek = getStartOfWeek(currentDate);
+
+            for (let day = 0; day < 5; day++) {
+                const date = new Date(startOfWeek);
+                date.setDate(date.getDate() + day);
+                date.setHours(0, 0, 0, 0);
+
+                const timeCells = document.querySelectorAll(`[data-day="${day}"]`);
+
+                if (date < today) {
+                    timeCells.forEach(cell => {
+                        cell.classList.add('disabled-cell');
+                    });
+                    const headerCell = document.querySelector(`.calendar-header-cell[data-day-index="${day}"]`);
+                    if (headerCell) {
+                        headerCell.classList.add('past-day');
+                    }
+                }
+            }
+        }
+
+        /* Zusammenführen von gebuchten Zellen */
+        function mergeBookedCells() {
+            const cells = document.querySelectorAll('.calendar-cell');
+            let prevCell = null;
+
+            cells.forEach(cell => {
+                if (cell.innerHTML !== '') {
+                    if (prevCell && cell.dataset.bookingInfo === prevCell.dataset.bookingInfo && cell.dataset.day === prevCell.dataset.day) {
+                        prevCell.style.height = (parseInt(prevCell.style.height) || 60) + 60 + 'px';
+                        cell.style.display = 'none';
+                    } else {
+                        prevCell = cell;
+                        cell.style.height = '60px';
+                        cell.style.display = 'block';
+                    }
+                } else {
+                    prevCell = null;
+                }
+            });
+        }
+
+        /* Speicherung der Buchungen im Local Storage */
+        function saveBookingsToLocalStorage() {
+            localStorage.setItem('bookingsData', JSON.stringify(bookingsData));
+        }
+
+        /* Laden der Buchungen aus dem Local Storage */
+        function loadBookingsFromLocalStorage() {
+            const data = localStorage.getItem('bookingsData');
+            if (data) {
+                bookingsData = JSON.parse(data);
+            } else {
+                bookingsData = [];
+            }
+        }
+
+        /* Event Listener für Navigation */
+        document.getElementById('prevWeek').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 7);
+            initCalendar();
+        });
+
+        document.getElementById('nextWeek').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 7);
+            initCalendar();
+        });
+
+        /* Anzeige der Buchungshistorie */
+        document.getElementById('historyButton').addEventListener('click', () => {
+            loadBookingHistory();
+            historyModal.style.display = 'block';
+        });
+
+        /* Laden der Buchungshistorie */
+        function loadBookingHistory() {
+            const historyTableBody = document.getElementById('historyTable').querySelector('tbody');
+            historyTableBody.innerHTML = '';
+            const currentWeekStart = getStartOfWeek(currentDate);
+            const currentWeekEnd = new Date(currentWeekStart);
+            currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
+
+            let weekBookings = bookingsData.filter(booking => {
+                const bookingDate = new Date(booking.date);
+                return bookingDate >= currentWeekStart && bookingDate <= currentWeekEnd;
+            });
+
+            // Sortiere die Buchungen nach Datum und Startzeit
+            weekBookings.sort((a, b) => {
+                const dateA = new Date(`${a.date}T${a.startTime}`);
+                const dateB = new Date(`${b.date}T${b.startTime}`);
+                return dateA - dateB;
+            });
+
+            weekBookings.forEach(booking => {
+                const row = document.createElement('tr');
+                const locale = language === 'DE' ? 'de-DE' : 'en-US';
+                const bookingDateFormatted = new Date(booking.date).toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                row.innerHTML = `
+                    <td>${bookingDateFormatted}</td>
+                    <td>${booking.title}</td>
+                    <td>${booking.name}</td>
+                    <td>${booking.department}</td>
+                    <td>${booking.startTime}</td>
+                    <td>${booking.endTime}</td>
+                    <td>${booking.type === 'internal' ? (language === 'DE' ? 'Intern' : 'Internal') : (language === 'DE' ? 'Extern' : 'External')}</td>
+                    <td>${booking.rooms.map(r => (language === 'DE' ? 'Meetingraum ' : 'Meeting Room ') + r).join(', ')}</td>
+                `;
+                historyTableBody.appendChild(row);
+            });
+        }
+
+        /* Schließen der Buchungshistorie */
+        function closeHistoryModal() {
+            historyModal.style.display = 'none';
+        }
+
+        /* Öffnen des Stornierungsmodals */
+        function openCancelModal() {
+            cancelModal.style.display = 'flex';
+            const cancelBookingDetails = document.getElementById('cancelBookingDetails');
+            cancelBookingDetails.innerHTML = `
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Titel' : 'Title'}:</strong> ${selectedBooking.title}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Name' : 'Name'}:</strong> ${selectedBooking.name}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Teilnehmerzahl' : 'Participants'}:</strong> ${selectedBooking.participants}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Startzeit' : 'Start Time'}:</strong> ${selectedBooking.startTime}</div>
+                <div class="booking-detail-item"><strong>${language === 'DE' ? 'Endzeit' : 'End Time'}:</strong> ${selectedBooking.endTime}</div>
+            `;
+        }
+
+        /* Event Listener für Stornierungsbestätigung */
+        document.getElementById('confirmCancel').addEventListener('click', () => {
+            if (selectedBooking) {
+                deleteBooking(selectedBooking);
+                closeCancelModal();
+                bookingDetailsModal.style.display = 'none';
+            }
+        });
+
+        /* Event Listener für Abbrechen der Stornierung */
+        document.getElementById('abortCancel').addEventListener('click', closeCancelModal);
+
+        /* Schließen des Stornierungsmodals */
+        function closeCancelModal() {
+            cancelModal.style.display = 'none';
+            selectedBooking = null;
+        }
+
+        /* Dark Mode Toggle */
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                darkModeToggle.textContent = '🌙';
+            } else {
+                darkModeToggle.textContent = '☀️';
+            }
+        });
+
+        /* Sprachumschalter */
+        const languageSwitcher = document.getElementById('languageSwitcher');
+        languageSwitcher.addEventListener('click', () => {
+            language = language === 'DE' ? 'EN' : 'DE';
+            languageSwitcher.textContent = language;
+            updateLanguage();
+        });
+
+        /* Aktualisieren der Sprache */
+        function updateLanguage() {
+            const elements = {
+                headerTitle: { DE: 'Meetingraum - Buchungssystem - Ebene 4', EN: 'Meeting Room - Booking System - Level 4' },
+                prevWeekText: { DE: '< Vorherige Woche', EN: '< Previous Week' },
+                nextWeekText: { DE: 'Nächste Woche >', EN: 'Next Week >' },
+                historyButton: { DE: 'Buchungshistorie', EN: 'Booking History' },
+                bookingTitle: { DE: 'Termin buchen', EN: 'Book Appointment' },
+                titleLabel: { DE: 'Titel', EN: 'Title' },
+                nameLabel: { DE: 'Name', EN: 'Name' },
+                emailLabel: { DE: 'E-Mail', EN: 'Email' },
+                departmentLabel: { DE: 'Abteilung', EN: 'Department' },
+                participantsLabel: { DE: 'Teilnehmerzahl', EN: 'Participants' },
+                startTimeLabel: { DE: 'Startzeit', EN: 'Start Time' },
+                endTimeLabel: { DE: 'Endzeit', EN: 'End Time' },
+                typeLabel: { DE: 'Buchungstyp', EN: 'Booking Type' },
+                bookButton: { DE: 'Buchen', EN: 'Book' },
+                cancelButton: { DE: 'Abbrechen', EN: 'Cancel' },
+                confirmationTitle: { DE: 'Buchung erfolgreich!', EN: 'Booking Successful!' },
+                closeConfirmationButton: { DE: 'Schließen', EN: 'Close' },
+                roomDetailsTitle: { DE: 'Raumdetails', EN: 'Room Details' },
+                maxParticipantsLabel: { DE: 'Maximale Teilnehmerzahl:', EN: 'Maximum Participants:' },
+                equipmentLabel: { DE: 'Ausstattung:', EN: 'Equipment:' },
+                additionalLabel: { DE: 'Zusätzlich:', EN: 'Additional:' },
+                legendInternal: { DE: 'Intern', EN: 'Internal' },
+                legendExternal: { DE: 'Extern', EN: 'External' },
+                legendMulti: { DE: 'Mehrraumbuchung', EN: 'Multi-Room Booking' },
+                cancelTitle: { DE: 'Termin stornieren?', EN: 'Cancel Appointment?' },
+                confirmCancel: { DE: 'Ja, Stornieren', EN: 'Yes, Cancel' },
+                abortCancel: { DE: 'Abbrechen', EN: 'Cancel' },
+                conflictTitle: { DE: 'Termin Konflikt', EN: 'Appointment Conflict' },
+                acceptAlternativeButton: { DE: 'Alternativ buchen', EN: 'Book Alternative' },
+                historyTitle: { DE: 'Aktuelle Buchungen der Woche', EN: 'Current Bookings of the Week' },
+                historyDateHeader: { DE: 'Datum', EN: 'Date' },
+                historyTitleHeader: { DE: 'Titel', EN: 'Title' },
+                historyNameHeader: { DE: 'Name', EN: 'Name' },
+                historyDepartmentHeader: { DE: 'Abteilung', EN: 'Department' },
+                historyStartHeader: { DE: 'Startzeit', EN: 'Start Time' },
+                historyEndHeader: { DE: 'Endzeit', EN: 'End Time' },
+                historyTypeHeader: { DE: 'Buchungsart', EN: 'Booking Type' },
+                historyRoomsHeader: { DE: 'Räume', EN: 'Rooms' },
+                closeHistoryButton: { DE: 'Schließen', EN: 'Close' },
+                roomButton: { DE: 'Meetingräume', EN: 'Meeting Rooms' },
+                bookingDetailsTitle: { DE: 'Buchungsdetails', EN: 'Booking Details' },
+                confirmCancelDetails: { DE: 'Ja, Stornieren', EN: 'Yes, Cancel' },
+                closeDetailsModal: { DE: 'Abbrechen', EN: 'Cancel' },
+                filterText: { DE: 'Filter', EN: 'Filter' },
+                filterTypeLabel: { DE: 'Buchungstyp', EN: 'Booking Type' },
+                filterRoomLabel: { DE: 'Raum', EN: 'Room' },
+                applyFilterButton: { DE: 'Anwenden', EN: 'Apply' },
+                roomSelectionLabel: { DE: 'Raum auswählen', EN: 'Select Room' },
+                selectedRooms: { DE: 'Meetingräume', EN: 'Meeting Rooms' },
+            };
+
+            for (let id in elements) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = elements[id][language];
+                }
+            }
+
+            updateRoomDetails();
+            updateHeaderButtons();
+            generateCalendarGrid();
+            loadBookings();
+        }
+
+        /* Filter anwenden */
+        document.getElementById('applyFilterButton').addEventListener('click', () => {
+            loadBookings();
+        });
+
+        /* Initialisierung beim Laden der Seite */
+        initCalendar();
+    </script>
+</body>
+</html>
